@@ -1,14 +1,41 @@
-from flask import Flask, request, jsonify
+from flask import jsonify, request
+import sqlite3
 
-app = Flask(__name__)
+def get_db(app):
+    """
+    Returns a database connection.
+    """
+    conn = sqlite3.connect(app.config["DATABASE"])
+    conn.row_factory = sqlite3.Row
+    return conn
 
-@app.route("/trades", methods=["GET", "POST"])
-def manage_trades():
-    if request.method == "GET":
-        return jsonify({"message": "Fetching trades..."})
-    elif request.method == "POST":
+def initialize_routes(app):
+    """
+    Defines and adds all routes to the Flask app.
+    """
+
+    @app.route("/trends", methods=["GET"])
+    def get_trends():
+        conn = get_db(app)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM trends")
+        trends = cursor.fetchall()
+        return jsonify([dict(trend) for trend in trends])
+
+    @app.route("/add-trend", methods=["POST"])
+    def add_trend():
         data = request.json
-        return jsonify({"message": "Trade executed", "trade": data})
+        symbol = data["symbol"]
+        date = data["date"]
+        trend_score = data["trend_score"]
+        predicted_price = data.get("predicted_price")
+        actual_price = data.get("actual_price")
 
-def initialize_routes():
-    app.run(debug=True)
+        conn = get_db(app)
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO trends (symbol, date, trend_score, predicted_price, actual_price) VALUES (?, ?, ?, ?, ?)",
+            (symbol, date, trend_score, predicted_price, actual_price),
+        )
+        conn.commit()
+        return jsonify({"message": "Trend added successfully!"}), 201

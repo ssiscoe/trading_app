@@ -1,10 +1,18 @@
 import sqlite3
 
-def setup_database():
-    conn = sqlite3.connect("trading_app.db")
+def setup_database(db_path):
+    """
+    Creates the database schema if it doesn't exist.
+    """
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    with open("db/schema.sql") as f:
-        cursor.executescript(f.read())
+    
+    # Check if the table already exists
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='trends';")
+    if not cursor.fetchone():
+        # If the table does not exist, execute the script
+        with open("db/schema.sql", "r") as schema_file:
+            cursor.executescript(schema_file.read())
+    
     conn.commit()
     conn.close()
-    print("Database setup complete.")
