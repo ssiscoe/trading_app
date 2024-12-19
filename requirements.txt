@@ -1,0 +1,5 @@
+Flask==2.3.0
+sqlite3
+pandas
+matplotlib
+robin_stocks

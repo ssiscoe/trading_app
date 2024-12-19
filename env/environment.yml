@@ -1,0 +1,17 @@
+name: trading_dashboard
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - flask
+  - sqlite
+  - redis
+  - pandas
+  - numpy
+  - scikit-learn
+  - matplotlib
+  - requests
+  - yfinance
+  - alpha_vantage
+  - sqlalchemy
+  - jupyter
